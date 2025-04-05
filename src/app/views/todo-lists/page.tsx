@@ -1,5 +1,5 @@
-import { usePowerSync, useStatus } from '@powersync/react';
-import AddIcon from '@mui/icons-material/Add';
+import { usePowerSync, useStatus } from "@powersync/react";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
   Button,
@@ -9,15 +9,15 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-  styled
-} from '@mui/material';
-import Fab from '@mui/material/Fab';
-import React from 'react';
-import { useSupabase } from '@/components/providers/SystemProvider';
-import { LISTS_TABLE } from '@/library/powersync/AppSchema';
-import { NavigationPage } from '@/components/navigation/NavigationPage';
-import { SearchBarWidget } from '@/components/widgets/SearchBarWidget';
-import { TodoListsWidget } from '@/components/widgets/TodoListsWidget';
+  styled,
+} from "@mui/material";
+import Fab from "@mui/material/Fab";
+import React from "react";
+import { useSupabase } from "@/components/providers/SystemProvider";
+import { LISTS_TABLE } from "@/library/powersync/AppSchema";
+import { NavigationPage } from "@/components/navigation/NavigationPage";
+import { SearchBarWidget } from "@/components/widgets/SearchBarWidget";
+import { TodoListsWidget } from "@/components/widgets/TodoListsWidget";
 
 export default function TodoListsPage() {
   const powerSync = usePowerSync();
@@ -41,7 +41,7 @@ export default function TodoListsPage() {
 
     const resultRecord = res.rows?.item(0);
     if (!resultRecord) {
-      throw new Error('Could not create list');
+      throw new Error("Could not create list");
     }
   };
 
@@ -53,27 +53,38 @@ export default function TodoListsPage() {
         </S.FloatingActionButton>
         <Box>
           <SearchBarWidget />
-          {!status.hasSynced ? <p>Busy with sync...</p> : <TodoListsWidget />}
+          {/* {!status.hasSynced ? <p>Busy with sync...</p> : <TodoListsWidget />} */}
+          <TodoListsWidget />
         </Box>
         {/* TODO use a dialog service in future, this is just a simple example app */}
         <Dialog
           open={showPrompt}
           onClose={() => setShowPrompt(false)}
           PaperProps={{
-            component: 'form',
+            component: "form",
             onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
               event.preventDefault();
               await createNewList(nameInputRef.current!.value);
               setShowPrompt(false);
-            }
+            },
           }}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">{'Create Todo List'}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">
+            {"Create Todo List"}
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText id="alert-dialog-description">Enter a name for a new todo list</DialogContentText>
-            <TextField sx={{ marginTop: '10px' }} fullWidth inputRef={nameInputRef} label="List Name" autoFocus />
+            <DialogContentText id="alert-dialog-description">
+              Enter a name for a new todo list
+            </DialogContentText>
+            <TextField
+              sx={{ marginTop: "10px" }}
+              fullWidth
+              inputRef={nameInputRef}
+              label="List Name"
+              autoFocus
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setShowPrompt(false)}>Cancel</Button>
