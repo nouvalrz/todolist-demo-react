@@ -1,31 +1,36 @@
-import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
-import { fileURLToPath, URL } from 'url';
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
+import { fileURLToPath, URL } from "url";
 
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  root: 'src',
+  root: "src",
   build: {
-    outDir: '../dist',
+    outDir: "../dist",
     rollupOptions: {
-      input: 'src/index.html'
+      input: "src/index.html",
     },
-    emptyOutDir: true
+    emptyOutDir: true,
   },
   resolve: {
-    alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]
+    alias: [
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    ],
   },
-  publicDir: '../public',
-  envDir: '..', // Use this dir for env vars, not 'src'.
+  publicDir: "../public",
+  envDir: "..", // Use this dir for env vars, not 'src'.
   optimizeDeps: {
     // Don't optimize these packages as they contain web workers and WASM files.
     // https://github.com/vitejs/vite/issues/11672#issuecomment-1415820673
-    exclude: ['@journeyapps/wa-sqlite', '@powersync/web'],
-    include: []
+    exclude: ["@journeyapps/wa-sqlite", "@powersync/web"],
+    include: [],
     // include: ['@powersync/web > js-logger'], // <-- Include `js-logger` when it isn't installed and imported.
   },
   plugins: [
@@ -33,43 +38,75 @@ export default defineConfig({
     topLevelAwait(),
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['powersync-logo.svg', 'supabase-logo.png', 'favicon.ico'],
+      registerType: "autoUpdate",
+      includeAssets: ["powersync-logo.svg", "supabase-logo.png", "favicon.ico"],
       manifest: {
-        theme_color: '#c44eff',
-        background_color: '#c44eff',
-        display: 'standalone',
-        scope: '/',
-        start_url: '/',
-        name: 'PowerSync React Demo',
-        short_name: 'PowerSync React',
+        theme_color: "#c44eff",
+        background_color: "#c44eff",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
+        name: "PowerSync React Demo",
+        short_name: "PowerSync React",
         icons: [
           {
-            src: '/icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: '/icons/icon-256x256.png',
-            sizes: '256x256',
-            type: 'image/png'
+            src: "/icons/icon-256x256.png",
+            sizes: "256x256",
+            type: "image/png",
           },
           {
-            src: '/icons/icon-384x384.png',
-            sizes: '384x384',
-            type: 'image/png'
+            src: "/icons/icon-384x384.png",
+            sizes: "384x384",
+            type: "image/png",
           },
           {
-            src: '/icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
-    })
+            src: "/icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === "document",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-cache",
+            },
+          },
+          {
+            urlPattern: ({ request }) =>
+              ["style", "script", "worker"].includes(request.destination),
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "asset-cache",
+            },
+          },
+          {
+            urlPattern: ({ request }) =>
+              ["image", "font"].includes(request.destination),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "image-font-cache",
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+            },
+          },
+        ],
+      },
+    }),
   ],
   worker: {
-    format: 'es',
-    plugins: () => [wasm(), topLevelAwait()]
-  }
+    format: "es",
+    plugins: () => [wasm(), topLevelAwait()],
+  },
 });
